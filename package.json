@@ -7,9 +7,12 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "install:web": "npm install --prefix apps/web",
+    "install:api": "cd apps/api && python -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
+    "install:all": "npm i && npm run install:web && npm run install:api",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:web": "npm --prefix apps/web run dev",
-    "dev:api": "./apps/api/.venv/bin/uvicorn main:app --reload --app-dir apps/api",
+    "dev:api": "./apps/api/venv/bin/uvicorn main:app --reload --app-dir apps/api",
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\""
   },
   "devDependencies": {

@@ -8,11 +8,17 @@ import styles from "./OutputNode.module.scss";
 import { useEffect, useState } from "react";
 import Connection from "@/components/CustomEdges/Connection/Connection";
 
+type OutputValue = {
+  prompt: string;
+  systemMessage: string;
+  response: Array<{ content: string }>;
+};
+
 const OutputNode = () => {
-  const [value, setValue] = useState({
+  const [value, setValue] = useState<OutputValue>({
     prompt: "",
     systemMessage: "",
-    response: "",
+    response: [],
   });
 
   useEffect(() => {
