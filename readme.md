@@ -69,7 +69,10 @@ type Node = {
 Planned features and improvements for Flow AI:
 
 - [ ] Conditional Nodes  
-      Add branching logic to workflows based on dynamic conditions and context evaluation.
+       Add branching logic to workflows based on dynamic conditions and context evaluation.
 
 - [ ] Built-in Chat Interface  
-      Integrate a chat UI to allow users to interact with workflows and agents in real time.
+       Integrate a chat UI to allow users to interact with workflows and agents in real time.
+
+- [ ] Tool Support  
+       Allow Agent Nodes to call external tools (APIs, functions, or plugins) to extend capabilities beyond LLM responses.
