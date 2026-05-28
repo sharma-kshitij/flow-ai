@@ -16,7 +16,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
 
   const [prompt, setPrompt] = useState("Hi");
 
-  const { setNodes } = useReactFlow();
+  const { getNodes,getEdges } = useReactFlow();
 
   const messages = useMemo(
     () => [
@@ -31,29 +31,34 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
     ],
     [systemMessage, prompt],
   );
-
-  const updateNodeData = (id: string, newData: any) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              value: newData,
-            },
-          };
-        }
-
-        return node;
-      }),
-    );
-  };
+ 
 
   const handleTrigger = useCallback(async () => {
-    console.log(messages)
-    const res = await axios.post('/api/llmCall',{messages:messages})
-    console.log(res.data)
+
+    const nodes = getNodes().map((nde)=>{
+      return {
+        id:nde.id,
+        type:nde.type,
+        data:nde.data
+      }
+    })
+
+    const edges = getEdges().map((edge)=>{
+      return {
+        id:edge.id,
+        source:edge.source,
+        target:edge.target
+      }
+    })
+
+    const workflow = {
+      id:"workflow_1",
+      nodes:nodes,
+      edges:edges
+    }
+    console.log("Worflow: ", workflow)
+    const res = await axios.post('/api/llmCall',{workflow})
+    console.log("Compiled Workflow: ",res.data)
   }, [messages, id]);
 
   return (
