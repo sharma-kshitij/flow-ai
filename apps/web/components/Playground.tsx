@@ -30,8 +30,8 @@ const initialNodes: any[] = [
     id: "dndnode_1780032610029_Input",
     type: "Input",
     position: {
-      x: 159.82421875,
-      y: 431.8515625,
+      x: 160.510129148661,
+      y: 418.3769961214236,
     },
     data: {
       label: "Input node",
@@ -44,15 +44,16 @@ const initialNodes: any[] = [
     dragging: false,
   },
   {
-    id: "dndnode_1780032611259_Agent",
+    id: "dndnode_1780056172189_Agent",
     type: "Agent",
     position: {
-      x: 466.28125,
-      y: 454.9765625,
+      x: 796.6928423367722,
+      y: 293.9318651422844,
     },
     data: {
-      label: "Agent node",
-      systemMessage: "You are a helpful assistant.",
+      label: "Tech node",
+      systemMessage:
+        "You are a stoic assistant. Be very serious and to the point. Refuse to participate in any time wasting activities.",
     },
     measured: {
       width: 260,
@@ -62,11 +63,48 @@ const initialNodes: any[] = [
     dragging: false,
   },
   {
-    id: "dndnode_1780032612473_Output",
+    id: "dndnode_1780056176028_Condition",
+    type: "Condition",
+    position: {
+      x: 449.10743735149174,
+      y: 389.22651808835474,
+    },
+    data: {
+      label: "Condition node",
+      condition: "contains",
+      value: "Is the user in a very serious mood?",
+    },
+    measured: {
+      width: 260,
+      height: 104,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780056179367_Agent",
+    type: "Agent",
+    position: {
+      x: 805.8699561624439,
+      y: 507.6902770710942,
+    },
+    data: {
+      label: "Agent node",
+      systemMessage: "You are a helpful, fun assistant.",
+    },
+    measured: {
+      width: 260,
+      height: 102,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780056180402_Output",
     type: "Output",
     position: {
-      x: 800.7265625,
-      y: 539.029296875,
+      x: 1131.308312420186,
+      y: 322.16157572650457,
     },
     data: {
       label: "Output node",
@@ -75,25 +113,62 @@ const initialNodes: any[] = [
       width: 220,
       height: 44,
     },
-    selected: true,
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780056181182_Output",
+    type: "Output",
+    position: {
+      x: 1130.8932849865366,
+      y: 537.8426965726861,
+    },
+    data: {
+      label: "Output node",
+    },
+    measured: {
+      width: 220,
+      height: 44,
+    },
+    selected: false,
     dragging: false,
   },
 ];
-
 const initialEdges = [
-  {
-    source: "dndnode_1780032611259_Agent",
-    sourceHandle: "source",
-    target: "dndnode_1780032612473_Output",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780032611259_Agentsource-dndnode_1780032612473_Outputtarget",
-  },
   {
     source: "dndnode_1780032610029_Input",
     sourceHandle: "source",
-    target: "dndnode_1780032611259_Agent",
+    target: "dndnode_1780056176028_Condition",
+    targetHandle: "input",
+    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780056176028_Conditioninput",
+  },
+  {
+    source: "dndnode_1780056176028_Condition",
+    sourceHandle: "true",
+    target: "dndnode_1780056172189_Agent",
     targetHandle: "target",
-    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780032611259_Agenttarget",
+    id: "xy-edge__dndnode_1780056176028_Conditiontrue-dndnode_1780056172189_Agenttarget",
+  },
+  {
+    source: "dndnode_1780056172189_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780056180402_Output",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780056172189_Agentsource-dndnode_1780056180402_Outputtarget",
+  },
+  {
+    source: "dndnode_1780056179367_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780056181182_Output",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780056179367_Agentsource-dndnode_1780056181182_Outputtarget",
+  },
+  {
+    source: "dndnode_1780056176028_Condition",
+    sourceHandle: "false",
+    target: "dndnode_1780056179367_Agent",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780056176028_Conditionfalse-dndnode_1780056179367_Agenttarget",
   },
 ];
 
@@ -187,30 +262,33 @@ function DnDFlow() {
           id: edge.id,
           source: edge?.source,
           target: edge?.target,
+          sourceHandle: edge?.sourceHandle,
         };
       }),
     };
 
-    console.log(edges);
-    console.log(nodes);
     setThinking(true);
     try {
-      console.log("Worflow: ", workflow);
+      // console.log("Worflow: ", workflow);
       const res = await axios.post("/api/llmCall", { workflow });
-      console.log("Compiled Workflow: ", res.data);
+      // console.log("Compiled Workflow: ", res.data);
+      console.log(nodes);
+      console.log(edges);
+      console.log("Result: ", res.data);
 
-      const lastObjectInd = Object.keys(res.data).at(-1) || "0";
-
-      console.log("Result: ", res.data[lastObjectInd]);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: res.data[lastObjectInd],
-          timestamp: "",
-        },
-      ]);
+      for (const [key, value] of Object.entries(res.data)) {
+        if (key.endsWith("Agent")) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: String(value),
+              timestamp: "",
+            },
+          ]);
+        }
+      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -364,9 +442,9 @@ function DnDFlow() {
               </div>
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="flex flex-col gap-3">
-                  {messages.map((msg) => (
+                  {messages.map((msg, ind) => (
                     <div
-                      key={msg.id}
+                      key={ind}
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
@@ -405,7 +483,7 @@ function DnDFlow() {
                         handleSend();
                       }
                     }}
-                    placeholder="Type a message..."
+                    placeholder="What is 2+2?"
                     className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                   />
                   <button

@@ -13,25 +13,25 @@ interface CustomHandleProps {
   defaultValue: string;
 }
 
-function Connection({ id, label, onChange, defaultValue }: CustomHandleProps) {
-  const connections = useNodeConnections({
-    handleType: "target",
-    handleId: id,
-  });
-
-  const nodeData = useNodesData(connections?.[0]?.source);
-
-  useEffect(() => {
-    onChange(nodeData?.data ? nodeData.data.value : defaultValue);
-  }, [nodeData, defaultValue]);
-
+function Connection({
+  id,
+  type,
+  position,
+  style,
+}: {
+  id: string;
+  type: string;
+  position: any;
+  style: any;
+}) {
   return (
     <div>
       <Handle
         type="target"
-        position={Position.Left}
-        id={id}
+        position={position}
         className="handle"
+        id={id}
+        style={style}
       />
     </div>
   );
