@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Handle, Position, useReactFlow } from "@xyflow/react";
-import { Card } from "../../ui/card";
+import NodeWrapper from "../NodeWrapper";
 
 interface AgentNodeProps {
   id: string;
@@ -35,7 +35,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
   }, [title, systemMessage, id, setNodes]);
 
   return (
-    <Card className="w-[260px] p-3">
+    <NodeWrapper id={id} className="w-[260px] p-3">
       {editingTitle ? (
         <input
           value={title}
@@ -66,6 +66,6 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
         <Handle type="target" position={Position.Left} id="target" />
         <Handle type="source" position={Position.Right} id="source" />
       </div>
-    </Card>
+    </NodeWrapper>
   );
 }

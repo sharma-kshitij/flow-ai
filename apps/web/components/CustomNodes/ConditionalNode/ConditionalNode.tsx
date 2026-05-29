@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Handle, Position, useReactFlow } from "@xyflow/react";
-import { Card } from "../../ui/card";
+import NodeWrapper from "../NodeWrapper";
 
 interface ConditionalNodeProps {
   id: string;
@@ -33,7 +33,7 @@ export default function ConditionalNode({ id, data }: ConditionalNodeProps) {
   }, [value, label, id, setNodes]);
 
   return (
-    <Card className="w-[260px] p-3">
+    <NodeWrapper id={id} className="w-[260px] p-3">
       {/* Title */}
       <input
         value={label}
@@ -70,6 +70,6 @@ export default function ConditionalNode({ id, data }: ConditionalNodeProps) {
         {/* INPUT */}
         <Handle type="target" position={Position.Left} id="input" />
       </div>
-    </Card>
+    </NodeWrapper>
   );
 }

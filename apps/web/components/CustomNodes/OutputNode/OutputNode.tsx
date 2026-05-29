@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Connection from "@/components/CustomEdges/Connection/Connection";
-import { Handle, Position } from "@xyflow/react";
-import { Card } from "../../ui/card";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
+import NodeWrapper from "../NodeWrapper";
 
 type OutputValue = {
   prompt: string;
@@ -9,7 +9,8 @@ type OutputValue = {
   response: Array<{ content: string }>;
 };
 
-const OutputNode = () => {
+const OutputNode = ({ id }: { id: string }) => {
+  const { setNodes } = useReactFlow();
   const [value, setValue] = useState<OutputValue>({
     prompt: "",
     systemMessage: "",
@@ -21,10 +22,10 @@ const OutputNode = () => {
   }, [value]);
 
   return (
-    <Card className="w-[220px]">
+    <NodeWrapper id={id} className="w-[220px]">
       <div className="text-sm font-semibold text-slate-900">Chat Output</div>
       <Handle type="target" position={Position.Left} id={"target"} />
-    </Card>
+    </NodeWrapper>
   );
 };
 

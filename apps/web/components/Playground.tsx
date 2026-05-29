@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Background,
   Connection,
@@ -17,6 +17,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { nodeTypes } from "./CustomNodes/NodeTypes";
 import axios from "axios";
+import { initialEdges, initialNodes } from "./ui/InitialFlowData";
 
 interface Message {
   id: number;
@@ -24,153 +25,6 @@ interface Message {
   content: string;
   timestamp: string;
 }
-
-const initialNodes: any[] = [
-  {
-    id: "dndnode_1780032610029_Input",
-    type: "Input",
-    position: {
-      x: 160.510129148661,
-      y: 418.3769961214236,
-    },
-    data: {
-      label: "Input node",
-    },
-    measured: {
-      width: 220,
-      height: 44,
-    },
-    selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780056172189_Agent",
-    type: "Agent",
-    position: {
-      x: 796.6928423367722,
-      y: 293.9318651422844,
-    },
-    data: {
-      label: "Stoic Assistant",
-      systemMessage:
-        "You are a stoic assistant. Be very serious and to the point. Refuse to participate in any time wasting activities.",
-    },
-    measured: {
-      width: 260,
-      height: 102,
-    },
-    selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780056176028_Condition",
-    type: "Condition",
-    position: {
-      x: 449.10743735149174,
-      y: 389.22651808835474,
-    },
-    data: {
-      label: "Condition node",
-      condition: "contains",
-      value: "Is the user in a very serious mood?",
-    },
-    measured: {
-      width: 260,
-      height: 104,
-    },
-    selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780056179367_Agent",
-    type: "Agent",
-    position: {
-      x: 805.8699561624439,
-      y: 507.6902770710942,
-    },
-    data: {
-      label: "Fun assistant",
-      systemMessage: "You are a helpful, fun assistant.",
-    },
-    measured: {
-      width: 260,
-      height: 102,
-    },
-    selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780056180402_Output",
-    type: "Output",
-    position: {
-      x: 1131.308312420186,
-      y: 322.16157572650457,
-    },
-    data: {
-      label: "Output node",
-    },
-    measured: {
-      width: 220,
-      height: 44,
-    },
-    selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780056181182_Output",
-    type: "Output",
-    position: {
-      x: 1130.8932849865366,
-      y: 537.8426965726861,
-    },
-    data: {
-      label: "Output node",
-    },
-    measured: {
-      width: 220,
-      height: 44,
-    },
-    selected: false,
-    dragging: false,
-  },
-];
-const initialEdges = [
-  {
-    source: "dndnode_1780032610029_Input",
-    sourceHandle: "source",
-    target: "dndnode_1780056176028_Condition",
-    targetHandle: "input",
-    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780056176028_Conditioninput",
-  },
-  {
-    source: "dndnode_1780056176028_Condition",
-    sourceHandle: "true",
-    target: "dndnode_1780056172189_Agent",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780056176028_Conditiontrue-dndnode_1780056172189_Agenttarget",
-  },
-  {
-    source: "dndnode_1780056172189_Agent",
-    sourceHandle: "source",
-    target: "dndnode_1780056180402_Output",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780056172189_Agentsource-dndnode_1780056180402_Outputtarget",
-  },
-  {
-    source: "dndnode_1780056179367_Agent",
-    sourceHandle: "source",
-    target: "dndnode_1780056181182_Output",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780056179367_Agentsource-dndnode_1780056181182_Outputtarget",
-  },
-  {
-    source: "dndnode_1780056176028_Condition",
-    sourceHandle: "false",
-    target: "dndnode_1780056179367_Agent",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780056176028_Conditionfalse-dndnode_1780056179367_Agenttarget",
-  },
-];
 
 function DnDFlow() {
   const [nodes, _, onNodesChange] = useNodesState(initialNodes);
@@ -181,6 +35,8 @@ function DnDFlow() {
   const [dragType, setDragType] = useState<string | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [thinking, setThinking] = useState(false);
+  const [hasPointerMoved, setHasPointerMoved] = useState(false);
+  const flowWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("flow-ai-theme") as
@@ -200,7 +56,8 @@ function DnDFlow() {
   }, [theme]);
 
   const { onDragStart, isDragging } = useDnD();
-  const { setNodes, zoomIn, zoomOut, fitView } = useReactFlow();
+  const { setNodes, zoomIn, zoomOut, fitView, screenToFlowPosition } =
+    useReactFlow();
 
   const createAddNewNode = useCallback(
     (nodeType: string) => {
@@ -269,9 +126,7 @@ function DnDFlow() {
 
     setThinking(true);
     try {
-      // console.log("Worflow: ", workflow);
       const res = await axios.post("/api/llmCall", { workflow });
-      // console.log("Compiled Workflow: ", res.data);
       console.log(nodes);
       console.log(edges);
       console.log("Result: ", res.data);
@@ -298,7 +153,7 @@ function DnDFlow() {
 
   return (
     <div className="dndflow">
-      <div className="reactflow-wrapper relative">
+      <div ref={flowWrapperRef} className="reactflow-wrapper relative">
         <div
           onBlur={() => setIsPanelOpen(false)}
           className="fixed top-6 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-auto"
@@ -374,7 +229,7 @@ function DnDFlow() {
           {isPanelOpen && (
             <Card className="w-[320px] rounded-3xl">
               <div className="px-3 pb-2 text-xs text-[var(--muted)]">
-                Drag a node onto the canvas to add it.
+                Click or drag a node to add it to the canvas.
               </div>
               <div className="grid gap-3">
                 {Object.keys(nodeTypes).map((key) => (
@@ -382,8 +237,28 @@ function DnDFlow() {
                     key={key}
                     className="cursor-grab rounded-md border border-[color:var(--border)] bg-[var(--card)] px-4 py-3 shadow-sm"
                     onPointerDown={(event) => {
+                      setHasPointerMoved(false);
                       setDragType(key);
                       onDragStart(event, createAddNewNode(key));
+                    }}
+                    onPointerMove={() => {
+                      if (dragType) {
+                        setHasPointerMoved(true);
+                      }
+                    }}
+                    onClick={() => {
+                      if (hasPointerMoved) {
+                        setHasPointerMoved(false);
+                        return;
+                      }
+                      if (!flowWrapperRef.current) return;
+                      const rect =
+                        flowWrapperRef.current.getBoundingClientRect();
+                      const position = screenToFlowPosition({
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2,
+                      });
+                      createAddNewNode(key)({ position });
                     }}
                   >
                     <div className="flex items-center justify-center">
@@ -394,13 +269,6 @@ function DnDFlow() {
                   </div>
                 ))}
               </div>
-              {/* <button
-                type="button"
-                onClick={handleTrigger}
-                className="mt-3 w-full rounded-2xl border border-[color:var(--border)] bg-[var(--panel)] px-3 py-2 text-sm font-semibold text-[var(--text)] transition hover:bg-[var(--card)]"
-              >
-                Trigger
-              </button> */}
             </Card>
           )}
         </div>
