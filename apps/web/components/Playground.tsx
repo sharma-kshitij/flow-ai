@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Background,
   Connection,
-  Edge,
   ReactFlow,
   ReactFlowProvider,
   addEdge,
@@ -17,18 +16,96 @@ import { DnDProvider, useDnD, useDnDPosition } from "./useDnD";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { nodeTypes } from "./CustomNodes/NodeTypes";
-import { messages } from "./TestMessages";
 import axios from "axios";
 
-const initialNodes: any[] = [];
+interface Message {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+}
+
+const initialNodes: any[] = [
+  {
+    id: "dndnode_1780032610029_Input",
+    type: "Input",
+    position: {
+      x: 159.82421875,
+      y: 431.8515625,
+    },
+    data: {
+      label: "Input node",
+    },
+    measured: {
+      width: 220,
+      height: 44,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780032611259_Agent",
+    type: "Agent",
+    position: {
+      x: 466.28125,
+      y: 454.9765625,
+    },
+    data: {
+      label: "Agent node",
+      systemMessage: "You are a helpful assistant.",
+    },
+    measured: {
+      width: 260,
+      height: 102,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780032612473_Output",
+    type: "Output",
+    position: {
+      x: 800.7265625,
+      y: 539.029296875,
+    },
+    data: {
+      label: "Output node",
+    },
+    measured: {
+      width: 220,
+      height: 44,
+    },
+    selected: true,
+    dragging: false,
+  },
+];
+
+const initialEdges = [
+  {
+    source: "dndnode_1780032611259_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780032612473_Output",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780032611259_Agentsource-dndnode_1780032612473_Outputtarget",
+  },
+  {
+    source: "dndnode_1780032610029_Input",
+    sourceHandle: "source",
+    target: "dndnode_1780032611259_Agent",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780032611259_Agenttarget",
+  },
+];
 
 function DnDFlow() {
   const [nodes, _, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [dragType, setDragType] = useState<string | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [thinking, setThinking] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("flow-ai-theme") as
@@ -74,68 +151,36 @@ function DnDFlow() {
 
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // const handleTrigger = useCallback(async () => {
-  //   const nodes = nodes().map((nde) => {
-  //     return {
-  //       id: nde.id,
-  //       type: nde.type,
-  //       data: nde.data,
-  //     };
-  //   });
-
-  //   const edges = edges().map((edge) => {
-  //     return {
-  //       id: edge.id,
-  //       source: edge.source,
-  //       target: edge.target,
-  //     };
-  //   });
-
-  //   const workflow = {
-  //     id: "workflow_1",
-  //     nodes: nodes,
-  //     edges: edges,
-  //   };
-  //   console.log("Worflow: ", workflow);
-  //   const res = await axios.post("/api/llmCall", { workflow });
-  //   console.log("Compiled Workflow: ", res.data);
-  // }, []);
-
-  const handleTrigger = async () => {
-    const workflow = {
-      id: "workflow_1",
-      nodes: nodes.map((nde) => {
-        return {
-          id: nde.id,
-          type: nde.type,
-          data: nde.data,
-        };
-      }),
-      edges: edges.map((edge) => {
-        return {
-          id: edge.id,
-          source: edge?.source,
-          target: edge?.target,
-        };
-      }),
-    };
-    console.log("Worflow: ", workflow);
-    const res = await axios.post("/api/llmCall", { workflow });
-    console.log("Compiled Workflow: ", res.data);
-  };
-
   const handleSend = async () => {
     if (!inputValue.trim()) return;
+    const userInput = inputValue;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        role: "user",
+        content: userInput,
+        timestamp: "",
+      },
+    ]);
     setInputValue("");
 
     const workflow = {
       id: "workflow_1",
       nodes: nodes.map((nde) => {
-        return {
-          id: nde.id,
-          type: nde.type,
-          data: nde.data,
-        };
+        if (nde.type === "Input")
+          return {
+            id: nde.id,
+            type: nde.type,
+            data: { ...nde.data, chatInput: userInput },
+          };
+        else {
+          return {
+            id: nde.id,
+            type: nde.type,
+            data: nde.data,
+          };
+        }
       }),
       edges: edges.map((edge) => {
         return {
@@ -145,15 +190,41 @@ function DnDFlow() {
         };
       }),
     };
-    console.log("Worflow: ", workflow);
-    const res = await axios.post("/api/llmCall", { workflow });
-    console.log("Compiled Workflow: ", res.data);
+
+    console.log(edges);
+    console.log(nodes);
+    setThinking(true);
+    try {
+      console.log("Worflow: ", workflow);
+      const res = await axios.post("/api/llmCall", { workflow });
+      console.log("Compiled Workflow: ", res.data);
+
+      const lastObjectInd = Object.keys(res.data).at(-1) || "0";
+
+      console.log("Result: ", res.data[lastObjectInd]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: res.data[lastObjectInd],
+          timestamp: "",
+        },
+      ]);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setThinking(false);
+    }
   };
 
   return (
     <div className="dndflow">
       <div className="reactflow-wrapper relative">
-        <div className="fixed top-6 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-auto">
+        <div
+          onBlur={() => setIsPanelOpen(false)}
+          className="fixed top-6 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-auto"
+        >
           <div className="flex items-center gap-2 rounded-full bg-[var(--panel)] px-3 py-2 shadow-2xl ring-1 ring-[color:var(--border)] backdrop-blur-sm text-[var(--text)]">
             <Button onClick={() => setIsPanelOpen((open) => !open)}>
               Add Nodes
@@ -309,6 +380,18 @@ function DnDFlow() {
                       </div>
                     </div>
                   ))}
+                  {thinking && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm bg-white text-slate-500 shadow-sm rounded-bl-none flex items-center gap-2">
+                        <span className="flex gap-1">
+                          <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
+                          <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
+                          <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                        </span>
+                        <span className="ml-2">Thinking...</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="border-t border-slate-200 px-6 py-4 bg-white">
