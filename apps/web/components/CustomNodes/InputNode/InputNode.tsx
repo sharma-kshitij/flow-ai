@@ -1,5 +1,5 @@
 import { Handle, Position, useReactFlow } from "@xyflow/react";
-import styles from "./InputNode.module.scss";
+import { Card } from "../../ui/card";
 
 const InputNode = ({ id }: { id: string }) => {
   const { setNodes } = useReactFlow();
@@ -21,15 +21,10 @@ const InputNode = ({ id }: { id: string }) => {
   };
 
   return (
-    <div className={styles.container}>
-      <div>Input Node</div>
-      <input
-        type="text"
-        onChange={(e) => updateNodeData(id, e.target.value)}
-        style={{ width: "150px" }}
-      />
+    <Card className="w-[220px]">
+      <div className="text-sm font-semibold text-slate-900">Chat Input</div>
       <Handle type="source" position={Position.Right} id={"source"} />
-    </div>
+    </Card>
   );
 };
 

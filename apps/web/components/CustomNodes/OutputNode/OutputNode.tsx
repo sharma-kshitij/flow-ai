@@ -1,12 +1,7 @@
-import {
-  Handle,
-  Position,
-  useNodeConnections,
-  useNodesData,
-} from "@xyflow/react";
-import styles from "./OutputNode.module.scss";
 import { useEffect, useState } from "react";
 import Connection from "@/components/CustomEdges/Connection/Connection";
+import { Handle, Position } from "@xyflow/react";
+import { Card } from "../../ui/card";
 
 type OutputValue = {
   prompt: string;
@@ -26,18 +21,10 @@ const OutputNode = () => {
   }, [value]);
 
   return (
-    <div className={styles.container}>
-      <div>
-        Output:
-        {` ${value?.response?.[value?.response?.length - 1]?.content}`}
-      </div>
-      <Connection
-        id="target"
-        label={"Testing"}
-        onChange={(c) => setValue(c)}
-        defaultValue="Output"
-      />
-    </div>
+    <Card className="w-[220px]">
+      <div className="text-sm font-semibold text-slate-900">Chat Output</div>
+      <Handle type="target" position={Position.Left} id={"target"} />
+    </Card>
   );
 };
 
