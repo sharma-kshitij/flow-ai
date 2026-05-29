@@ -37,6 +37,7 @@ function DnDFlow() {
   const [thinking, setThinking] = useState(false);
   const [hasPointerMoved, setHasPointerMoved] = useState(false);
   const [pointerDownType, setPointerDownType] = useState<string | null>(null);
+  const pointerDownPointRef = useRef<{ x: number; y: number } | null>(null);
   const flowWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -240,13 +241,22 @@ function DnDFlow() {
                     onPointerDown={(event) => {
                       setHasPointerMoved(false);
                       setPointerDownType(event.pointerType);
+                      pointerDownPointRef.current = {
+                        x: event.clientX,
+                        y: event.clientY,
+                      };
                       setDragType(key);
                       if (event.pointerType === "mouse") {
                         onDragStart(event, createAddNewNode(key));
                       }
                     }}
-                    onPointerMove={() => {
-                      if (dragType) {
+                    onPointerMove={(event) => {
+                      if (!dragType || !pointerDownPointRef.current) {
+                        return;
+                      }
+                      const dx = event.clientX - pointerDownPointRef.current.x;
+                      const dy = event.clientY - pointerDownPointRef.current.y;
+                      if (Math.hypot(dx, dy) > 8) {
                         setHasPointerMoved(true);
                       }
                     }}
@@ -261,6 +271,7 @@ function DnDFlow() {
                         });
                         createAddNewNode(key)({ position });
                       }
+                      pointerDownPointRef.current = null;
                       setHasPointerMoved(false);
                       setPointerDownType(null);
                       setDragType(null);
