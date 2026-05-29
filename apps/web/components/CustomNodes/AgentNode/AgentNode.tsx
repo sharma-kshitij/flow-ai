@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Handle, Position, useReactFlow } from "@xyflow/react";
-import Connection from "@/components/CustomEdges/Connection/Connection";
 import { Card } from "../../ui/card";
 
 interface AgentNodeProps {
@@ -9,12 +8,27 @@ interface AgentNodeProps {
 }
 
 export default function AgentNode({ id, data }: AgentNodeProps) {
+  const { setNodes } = useReactFlow();
+
   const [systemMessage, setSystemMessage] = useState(
-    "You are a helpful assistant.",
+    data?.systemMessage || "You are a helpful assistant.",
   );
 
-  const [prompt, setPrompt] = useState("Hi");
-
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                systemMessage,
+              },
+            }
+          : node,
+      ),
+    );
+  }, [systemMessage]);
   return (
     <Card className="w-[260px]">
       <div className="mb-2 text-sm font-semibold text-[var(--text)]">
