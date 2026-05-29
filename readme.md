@@ -1,78 +1,97 @@
 # Flow AI
 
-Flow AI is a visual workflow engine for building and executing AI-powered pipelines. It allows users to construct node-based workflows (like Input → Agent → Output) and execute them in a structured, deterministic order using a compiled execution graph.
+Flow AI is a visual workflow builder for creating and running simple AI pipelines.
+
+You can connect nodes like **Input → Agent → Output** and run them as a graph. I created it as a learning project to explore how workflow engines and LLM calls can work together.
 
 ---
 
 ## Features
 
-- Node-based workflow builder
-- Input Node (user input ingestion)
-- Agent Node (LLM execution)
-- Output Node (result propagation)
-- Conditional Node (branching logic)
-- Directed acyclic graph (DAG) execution model
-- Workflow compiler with:
-  - Adjacency list generation
-  - Topological sorting for execution order
-- Workflow runner with shared execution context
-- Extensible node registry system
-- Full-stack architecture (Next.js + Python FastAPI backend)
+- Visual node-based workflow builder (React Flow)
+- Drag and connect nodes to build workflows
+- Input, Agent, Output, and Conditional nodes
+- True/False branching with conditional nodes
+- DAG-based execution system
+- Shared state between nodes
+- Async support for LLM calls
+- Extensible node system using a registry
 
 ---
 
-## Architecture Overview
+## How it works
 
-Flow AI is split into two main parts:
-
-### 1. Frontend (Next.js)
-
-- Visual workflow builder UI
-- Node creation and connection system
-- Sends workflow graph to backend for compilation/execution
-
-### 2. Backend (Python FastAPI / Node runtime logic)
-
-- Compiles workflow into executable graph
-- Performs topological sort of nodes
-- Executes nodes sequentially using a shared context object
+1. You create a workflow in the UI using nodes and connections
+2. The frontend sends the workflow structure to the backend
+3. The backend converts it into a graph (dependencies between nodes)
+4. Nodes with no dependencies run first
+5. Each node runs and stores its output
+6. The next nodes run when their inputs are ready
+7. This continues until the workflow finishes
 
 ---
 
-## 🔄 Workflow Execution Model
+## Node types
 
-1. User builds a workflow graph
-2. Backend receives workflow definition
-3. Compiler generates:
-   - Adjacency list
-   - Reverse adjacency (dependency map)
-4. Topological sort determines execution order
-5. Workflow Runner executes nodes sequentially
-6. Each node reads/writes from a shared context
+### Input node
+
+Starts the workflow and takes user input.
+
+### Agent node
+
+Calls an LLM and returns a response based on the input.
+
+### Conditional node
+
+Checks a condition and returns `true` or `false`.
+
+Used to route the workflow into different paths.
+
+### Output node
+
+Shows the final result of the workflow.
 
 ---
 
-## Node System
+## Edge system
 
-Each node follows a standard interface:
+Edges define how nodes are connected.
 
-```ts
-type Node = {
-  id: string;
-  type: "input" | "agent" | "output" | "conditional";
-  data: Record<string, any>;
-};
+- Normal edges pass data forward
+- Conditional nodes use:
+  - `true`
+  - `false`
+
+Only the matching branch runs.
+
+Example:
+
+```
+Input
+↓
+Conditional
+├── true → Agent A
+└── false → Agent B
 ```
 
-## Roadmap
+---
 
-Planned features and improvements for Flow AI:
+## Execution model
 
-- [ ] Conditional Nodes  
-       Add branching logic to workflows based on dynamic conditions and context evaluation.
+Flow AI uses a simple DAG execution approach:
 
-- [ ] Built-in Chat Interface  
-       Integrate a chat UI to allow users to interact with workflows and agents in real time.
+- Nodes without dependencies run first
+- When a node finishes, it unlocks the next nodes
+- Execution continues until all reachable nodes are done
 
-- [ ] Tool Support  
-       Allow Agent Nodes to call external tools (APIs, functions, or plugins) to extend capabilities beyond LLM responses.
+Each node gets a shared context object:
+
+```python
+ctx = {
+  "nodeId": "node_1",
+  "workflowId": "workflow_1",
+  "input": "value from previous node",
+  "config": {},
+  "state": {}
+}
+```
