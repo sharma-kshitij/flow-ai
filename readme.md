@@ -6,6 +6,18 @@ You can connect nodes like **Input → Agent → Output** and run them as a grap
 
 ---
 
+## Installation Instructions:
+
+Make sure you have Python and Node installed.
+
+1.  Clone the Project
+2.  Run `npm run install:all` in root directory
+3.  Run `npm run dev` in root directory
+4.  Add an `.env.local` file inside root/apps/web with the following:
+    `BACKEND_BASE_URL = "http://localhost:8000" `
+5.  Add an `.env.local` file inside root/apps/api with the following:
+    `OPENAI_API_KEY="<Your API key here>"`
+
 ## Features
 
 - Visual node-based workflow builder (React Flow)
