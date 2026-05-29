@@ -36,6 +36,7 @@ function DnDFlow() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [thinking, setThinking] = useState(false);
   const [hasPointerMoved, setHasPointerMoved] = useState(false);
+  const [pointerDownType, setPointerDownType] = useState<string | null>(null);
   const flowWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -238,27 +239,31 @@ function DnDFlow() {
                     className="cursor-grab rounded-md border border-[color:var(--border)] bg-[var(--card)] px-4 py-3 shadow-sm"
                     onPointerDown={(event) => {
                       setHasPointerMoved(false);
+                      setPointerDownType(event.pointerType);
                       setDragType(key);
-                      onDragStart(event, createAddNewNode(key));
+                      if (event.pointerType === "mouse") {
+                        onDragStart(event, createAddNewNode(key));
+                      }
                     }}
                     onPointerMove={() => {
                       if (dragType) {
                         setHasPointerMoved(true);
                       }
                     }}
-                    onClick={() => {
-                      if (hasPointerMoved) {
-                        setHasPointerMoved(false);
-                        return;
+                    onPointerUp={() => {
+                      if (!hasPointerMoved) {
+                        if (!flowWrapperRef.current) return;
+                        const rect =
+                          flowWrapperRef.current.getBoundingClientRect();
+                        const position = screenToFlowPosition({
+                          x: rect.left + rect.width / 2,
+                          y: rect.top + rect.height / 2,
+                        });
+                        createAddNewNode(key)({ position });
                       }
-                      if (!flowWrapperRef.current) return;
-                      const rect =
-                        flowWrapperRef.current.getBoundingClientRect();
-                      const position = screenToFlowPosition({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2,
-                      });
-                      createAddNewNode(key)({ position });
+                      setHasPointerMoved(false);
+                      setPointerDownType(null);
+                      setDragType(null);
                     }}
                   >
                     <div className="flex items-center justify-center">
