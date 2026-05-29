@@ -51,7 +51,7 @@ const initialNodes: any[] = [
       y: 293.9318651422844,
     },
     data: {
-      label: "Tech node",
+      label: "Stoic Assistant",
       systemMessage:
         "You are a stoic assistant. Be very serious and to the point. Refuse to participate in any time wasting activities.",
     },
@@ -89,7 +89,7 @@ const initialNodes: any[] = [
       y: 507.6902770710942,
     },
     data: {
-      label: "Agent node",
+      label: "Fun assistant",
       systemMessage: "You are a helpful, fun assistant.",
     },
     measured: {
