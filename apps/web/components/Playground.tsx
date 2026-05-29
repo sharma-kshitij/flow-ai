@@ -30,8 +30,8 @@ const initialNodes: any[] = [
     id: "dndnode_1780032610029_Input",
     type: "Input",
     position: {
-      x: 159.82421875,
-      y: 431.8515625,
+      x: 160.510129148661,
+      y: 418.3769961214236,
     },
     data: {
       label: "Input node",
@@ -44,15 +44,16 @@ const initialNodes: any[] = [
     dragging: false,
   },
   {
-    id: "dndnode_1780032611259_Agent",
+    id: "dndnode_1780056172189_Agent",
     type: "Agent",
     position: {
-      x: 407.7259488866397,
-      y: 445.91443256578947,
+      x: 796.6928423367722,
+      y: 293.9318651422844,
     },
     data: {
-      label: "Student node",
-      systemMessage: "You are a helpful student.",
+      label: "Tech node",
+      systemMessage:
+        "You are a stoic assistant. Be very serious and to the point. Refuse to participate in any time wasting activities.",
     },
     measured: {
       width: 260,
@@ -62,11 +63,48 @@ const initialNodes: any[] = [
     dragging: false,
   },
   {
-    id: "dndnode_1780032612473_Output",
+    id: "dndnode_1780056176028_Condition",
+    type: "Condition",
+    position: {
+      x: 449.10743735149174,
+      y: 389.22651808835474,
+    },
+    data: {
+      label: "Condition node",
+      condition: "contains",
+      value: "Is the user in a very serious mood?",
+    },
+    measured: {
+      width: 260,
+      height: 104,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780056179367_Agent",
+    type: "Agent",
+    position: {
+      x: 805.8699561624439,
+      y: 507.6902770710942,
+    },
+    data: {
+      label: "Agent node",
+      systemMessage: "You are a helpful, fun assistant.",
+    },
+    measured: {
+      width: 260,
+      height: 102,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780056180402_Output",
     type: "Output",
     position: {
-      x: 1342.8398411505596,
-      y: 471.1454504248541,
+      x: 1131.308312420186,
+      y: 322.16157572650457,
     },
     data: {
       label: "Output node",
@@ -79,39 +117,20 @@ const initialNodes: any[] = [
     dragging: false,
   },
   {
-    id: "dndnode_1780036475434_Agent",
-    type: "Agent",
+    id: "dndnode_1780056181182_Output",
+    type: "Output",
     position: {
-      x: 1007.8440694955682,
-      y: 564.1141407213714,
+      x: 1130.8932849865366,
+      y: 537.8426965726861,
     },
     data: {
-      label: "Student node",
-      systemMessage: "You are a helpful student.",
+      label: "Output node",
     },
     measured: {
-      width: 260,
-      height: 102,
+      width: 220,
+      height: 44,
     },
     selected: false,
-    dragging: false,
-  },
-  {
-    id: "dndnode_1780036476238_Agent",
-    type: "Agent",
-    position: {
-      x: 706.8087177477385,
-      y: 504.71743391399923,
-    },
-    data: {
-      label: "Teacher node",
-      systemMessage: "You are a snarky teacher.",
-    },
-    measured: {
-      width: 260,
-      height: 102,
-    },
-    selected: true,
     dragging: false,
   },
 ];
@@ -119,30 +138,37 @@ const initialEdges = [
   {
     source: "dndnode_1780032610029_Input",
     sourceHandle: "source",
-    target: "dndnode_1780032611259_Agent",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780032611259_Agenttarget",
+    target: "dndnode_1780056176028_Condition",
+    targetHandle: "input",
+    id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780056176028_Conditioninput",
   },
   {
-    source: "dndnode_1780032611259_Agent",
-    sourceHandle: "source",
-    target: "dndnode_1780036476238_Agent",
+    source: "dndnode_1780056176028_Condition",
+    sourceHandle: "true",
+    target: "dndnode_1780056172189_Agent",
     targetHandle: "target",
-    id: "xy-edge__dndnode_1780032611259_Agentsource-dndnode_1780036476238_Agenttarget",
+    id: "xy-edge__dndnode_1780056176028_Conditiontrue-dndnode_1780056172189_Agenttarget",
   },
   {
-    source: "dndnode_1780036476238_Agent",
+    source: "dndnode_1780056172189_Agent",
     sourceHandle: "source",
-    target: "dndnode_1780036475434_Agent",
+    target: "dndnode_1780056180402_Output",
     targetHandle: "target",
-    id: "xy-edge__dndnode_1780036476238_Agentsource-dndnode_1780036475434_Agenttarget",
+    id: "xy-edge__dndnode_1780056172189_Agentsource-dndnode_1780056180402_Outputtarget",
   },
   {
-    source: "dndnode_1780036475434_Agent",
+    source: "dndnode_1780056179367_Agent",
     sourceHandle: "source",
-    target: "dndnode_1780032612473_Output",
+    target: "dndnode_1780056181182_Output",
     targetHandle: "target",
-    id: "xy-edge__dndnode_1780036475434_Agentsource-dndnode_1780032612473_Outputtarget",
+    id: "xy-edge__dndnode_1780056179367_Agentsource-dndnode_1780056181182_Outputtarget",
+  },
+  {
+    source: "dndnode_1780056176028_Condition",
+    sourceHandle: "false",
+    target: "dndnode_1780056179367_Agent",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780056176028_Conditionfalse-dndnode_1780056179367_Agenttarget",
   },
 ];
 
@@ -236,6 +262,7 @@ function DnDFlow() {
           id: edge.id,
           source: edge?.source,
           target: edge?.target,
+          sourceHandle: edge?.sourceHandle,
         };
       }),
     };
@@ -245,7 +272,8 @@ function DnDFlow() {
       // console.log("Worflow: ", workflow);
       const res = await axios.post("/api/llmCall", { workflow });
       // console.log("Compiled Workflow: ", res.data);
-
+      console.log(nodes);
+      console.log(edges);
       console.log("Result: ", res.data);
 
       for (const [key, value] of Object.entries(res.data)) {

@@ -1,21 +1,12 @@
+from collections import defaultdict
+from models.workflow import Edge
+
 def build_adjacency_list(workflow):
-
-    adjacency = {}
-    reverse = {}
-
-    for node in workflow.nodes:
-
-        adjacency[node.id] = []
-        reverse[node.id] = []
+    adjacency = defaultdict(list)
+    reverse = defaultdict(list)
 
     for edge in workflow.edges:
-
-        adjacency[edge.source].append(
-            edge.target
-        )
-
-        reverse[edge.target].append(
-            edge.source
-        )
+        adjacency[edge.source].append(edge)
+        reverse[edge.target].append(edge.source)
 
     return adjacency, reverse
