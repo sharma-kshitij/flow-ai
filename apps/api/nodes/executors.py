@@ -4,9 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def inputExecutor(ctx):
-    print(ctx['config']['chatInput'])
-    return {"output":ctx['config']['chatInput']}
 
 OPENAI_KEY=os.getenv("OPENAI_API_KEY")
 
@@ -14,10 +11,13 @@ client = AsyncOpenAI(
     api_key=OPENAI_KEY
 )
 
+def inputExecutor(ctx):
+    return {"output":ctx['config']['chatInput']}
+
 async def agentExecutor(ctx):
     user_input = ctx['input']
-    
-    output = "Hi,", ctx['input'], "! How may I assist you today? "
+    print(ctx['config'])
+    output = f"{user_input}"
     
     response = await client.chat.completions.create(
         model="gpt-4.1-nano",
@@ -34,7 +34,12 @@ async def agentExecutor(ctx):
     )
 
     output = response.choices[0].message.content
+    
+    print("\n===== AGENT START =====")
+    print("INPUT:", ctx.get("input")) 
 
+    print("OUTPUT:", output)
+    print("===== AGENT END =====\n")
     return {"output":output}
 
 def outputExecutor(ctx):

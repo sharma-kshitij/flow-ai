@@ -47,12 +47,12 @@ const initialNodes: any[] = [
     id: "dndnode_1780032611259_Agent",
     type: "Agent",
     position: {
-      x: 466.28125,
-      y: 454.9765625,
+      x: 407.7259488866397,
+      y: 445.91443256578947,
     },
     data: {
-      label: "Agent node",
-      systemMessage: "You are a helpful assistant.",
+      label: "Student node",
+      systemMessage: "You are a helpful student.",
     },
     measured: {
       width: 260,
@@ -65,8 +65,8 @@ const initialNodes: any[] = [
     id: "dndnode_1780032612473_Output",
     type: "Output",
     position: {
-      x: 800.7265625,
-      y: 539.029296875,
+      x: 1342.8398411505596,
+      y: 471.1454504248541,
     },
     data: {
       label: "Output node",
@@ -75,25 +75,74 @@ const initialNodes: any[] = [
       width: 220,
       height: 44,
     },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780036475434_Agent",
+    type: "Agent",
+    position: {
+      x: 1007.8440694955682,
+      y: 564.1141407213714,
+    },
+    data: {
+      label: "Student node",
+      systemMessage: "You are a helpful student.",
+    },
+    measured: {
+      width: 260,
+      height: 102,
+    },
+    selected: false,
+    dragging: false,
+  },
+  {
+    id: "dndnode_1780036476238_Agent",
+    type: "Agent",
+    position: {
+      x: 706.8087177477385,
+      y: 504.71743391399923,
+    },
+    data: {
+      label: "Teacher node",
+      systemMessage: "You are a snarky teacher.",
+    },
+    measured: {
+      width: 260,
+      height: 102,
+    },
     selected: true,
     dragging: false,
   },
 ];
-
 const initialEdges = [
-  {
-    source: "dndnode_1780032611259_Agent",
-    sourceHandle: "source",
-    target: "dndnode_1780032612473_Output",
-    targetHandle: "target",
-    id: "xy-edge__dndnode_1780032611259_Agentsource-dndnode_1780032612473_Outputtarget",
-  },
   {
     source: "dndnode_1780032610029_Input",
     sourceHandle: "source",
     target: "dndnode_1780032611259_Agent",
     targetHandle: "target",
     id: "xy-edge__dndnode_1780032610029_Inputsource-dndnode_1780032611259_Agenttarget",
+  },
+  {
+    source: "dndnode_1780032611259_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780036476238_Agent",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780032611259_Agentsource-dndnode_1780036476238_Agenttarget",
+  },
+  {
+    source: "dndnode_1780036476238_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780036475434_Agent",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780036476238_Agentsource-dndnode_1780036475434_Agenttarget",
+  },
+  {
+    source: "dndnode_1780036475434_Agent",
+    sourceHandle: "source",
+    target: "dndnode_1780032612473_Output",
+    targetHandle: "target",
+    id: "xy-edge__dndnode_1780036475434_Agentsource-dndnode_1780032612473_Outputtarget",
   },
 ];
 
@@ -191,26 +240,27 @@ function DnDFlow() {
       }),
     };
 
-    console.log(edges);
-    console.log(nodes);
     setThinking(true);
     try {
-      console.log("Worflow: ", workflow);
+      // console.log("Worflow: ", workflow);
       const res = await axios.post("/api/llmCall", { workflow });
-      console.log("Compiled Workflow: ", res.data);
+      // console.log("Compiled Workflow: ", res.data);
 
-      const lastObjectInd = Object.keys(res.data).at(-1) || "0";
+      console.log("Result: ", res.data);
 
-      console.log("Result: ", res.data[lastObjectInd]);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: res.data[lastObjectInd],
-          timestamp: "",
-        },
-      ]);
+      for (const [key, value] of Object.entries(res.data)) {
+        if (key.endsWith("Agent")) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: String(value),
+              timestamp: "",
+            },
+          ]);
+        }
+      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -364,9 +414,9 @@ function DnDFlow() {
               </div>
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="flex flex-col gap-3">
-                  {messages.map((msg) => (
+                  {messages.map((msg, ind) => (
                     <div
-                      key={msg.id}
+                      key={ind}
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
@@ -405,7 +455,7 @@ function DnDFlow() {
                         handleSend();
                       }
                     }}
-                    placeholder="Type a message..."
+                    placeholder="What is 2+2?"
                     className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                   />
                   <button
