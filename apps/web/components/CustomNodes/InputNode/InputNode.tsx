@@ -1,5 +1,5 @@
 import { Handle, Position, useReactFlow } from "@xyflow/react";
-import { Card } from "../../ui/card";
+import NodeWrapper from "../NodeWrapper";
 
 const InputNode = ({ id }: { id: string }) => {
   const { setNodes } = useReactFlow();
@@ -21,10 +21,10 @@ const InputNode = ({ id }: { id: string }) => {
   };
 
   return (
-    <Card className="w-[220px]">
+    <NodeWrapper id={id} className="w-[220px]">
       <div className="text-sm font-semibold text-slate-900">Chat Input</div>
       <Handle type="source" position={Position.Right} id={"source"} />
-    </Card>
+    </NodeWrapper>
   );
 };
 
